@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import './App.css'
 
 function App() {
@@ -11,6 +11,51 @@ function App() {
   const [hinglishShayari, setHinglishShayari] = useState(
     'Raat ki siyahi mein teri yaadein ghulti rahi,\ndil ne har dhadkan par tera naam likh daala.',
   )
+  const [saving, setSaving] = useState(false)
+  const [saveMessage, setSaveMessage] = useState('')
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const res = await fetch('http://localhost:3001/api/content')
+        if (!res.ok) return
+        const data = await res.json()
+        if (data.englishMicro) setEnglishMicro(data.englishMicro)
+        if (data.hinglishMicro) setHinglishMicro(data.hinglishMicro)
+        if (data.hinglishShayari) setHinglishShayari(data.hinglishShayari)
+      } catch (err) {
+        console.error(err)
+      }
+    }
+
+    load()
+  }, [])
+
+  const handleSave = async () => {
+    try {
+      setSaving(true)
+      setSaveMessage('')
+      const res = await fetch('http://localhost:3001/api/content', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          englishMicro,
+          hinglishMicro,
+          hinglishShayari,
+        }),
+      })
+
+      if (!res.ok) throw new Error('Failed to save')
+      setSaveMessage('Saved to database ✅')
+    } catch (err) {
+      console.error(err)
+      setSaveMessage('Error saving to database')
+    } finally {
+      setSaving(false)
+    }
+  }
 
   return (
     <div className="page">
@@ -169,6 +214,18 @@ function App() {
                 onChange={(e) => setHinglishShayari(e.target.value)}
               />
             </div>
+          </div>
+
+          <div className="writer-actions">
+            <button
+              type="button"
+              className="btn btn-primary"
+              onClick={handleSave}
+              disabled={saving}
+            >
+              {saving ? 'Saving…' : 'Save all to database'}
+            </button>
+            {saveMessage && <p className="save-message">{saveMessage}</p>}
           </div>
         </section>
 
