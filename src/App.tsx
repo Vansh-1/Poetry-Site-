@@ -97,7 +97,7 @@ function App() {
             <div className="about-highlight" />
             <div className="about-content">
               <p className="section-eyebrow">About the writer</p>
-              <h2 className="section-title">Pinak — a heart that writes</h2>
+              <h2 className="section-title">Vansh — a heart that writes</h2>
               <p className="section-description">
                 This space is a safe corner of the internet for overthinkers,
                 silent lovers, night owls, and old-school romantics. Every
