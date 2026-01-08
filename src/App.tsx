@@ -17,7 +17,7 @@ function App() {
       <header className="hero">
         <div className="hero-overlay" />
         <div className="hero-content">
-          <p className="hero-tag">Poetry • Shayari • Stories</p>
+          <p className="hero-tag">Poetr • Shayari • Stories</p>
           <h1 className="hero-title">Whispers of the Heart</h1>
           <p className="hero-subtitle">
             Soulful <span>Hindi</span> and <span>English</span> words, crafted to
