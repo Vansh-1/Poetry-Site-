@@ -26,7 +26,7 @@ function App() {
   useEffect(() => {
     const load = async () => {
       try {
-        const res = await fetch('http://localhost:3001/api/content')
+        const res = await fetch('/api/content')
         if (!res.ok) return
         const data = await res.json()
         if (data.englishMicro) setEnglishMicro(data.englishMicro)
@@ -39,7 +39,7 @@ function App() {
 
     const loadMessages = async () => {
       try {
-        const res = await fetch('http://localhost:3001/api/messages')
+        const res = await fetch('/api/messages')
         if (!res.ok) return
         const data = await res.json()
         if (Array.isArray(data.messages)) {
@@ -65,7 +65,7 @@ function App() {
     try {
       setSaving(true)
       setSaveMessage('')
-      const res = await fetch('http://localhost:3001/api/content', {
+      const res = await fetch('/api/content', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -98,7 +98,7 @@ function App() {
 
     try {
       setSubmittingMessage(true)
-      const res = await fetch('http://localhost:3001/api/messages', {
+      const res = await fetch('/api/messages', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

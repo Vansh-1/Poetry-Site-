@@ -5,18 +5,12 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "dev:server": "node server/index.js",
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview"
   },
   "dependencies": {
-    "@neondatabase/serverless": "^1.0.2",
-    "cors": "^2.8.5",
-    "dotenv": "^17.2.3",
-    "express": "^5.2.1",
     "mongodb": "^7.0.0",
-    "pg": "^8.16.3",
     "react": "^19.2.0",
     "react-dom": "^19.2.0"
   },
