@@ -1,49 +1,73 @@
 require('dotenv').config()
 const express = require('express')
 const cors = require('cors')
-const { Pool } = require('pg')
+const { MongoClient } = require('mongodb')
 
 const app = express()
 const port = process.env.PORT || 3001
 
-// Prefer DATABASE_URL for compatibility, but fall back to STACK_SECRET_SERVER_KEY
-const connectionString =
-  process.env.DATABASE_URL || process.env.STACK_SECRET_SERVER_KEY
+// MongoDB connection URI (MongoDB Atlas)
+const mongoUri = process.env.MONGODB_URI
+if (!mongoUri) {
+  console.error('MONGODB_URI is not set in .env')
+  process.exit(1)
+}
 
-const pool = new Pool({
-  connectionString,
-})
+let client
+let db
+let collection
+let messagesCollection
+
+async function initMongo() {
+  if (collection && db && messagesCollection) return { collection, messagesCollection }
+
+  if (!client) {
+    client = new MongoClient(mongoUri)
+    await client.connect()
+    console.log('Connected to MongoDB')
+  }
+
+  if (!db) {
+    db = client.db('poetry_site') // you can rename this DB in the URI if you want
+  }
+
+  if (!collection) {
+    collection = db.collection('writer_content')
+
+    // Ensure there is always a single document we read/write for main content
+    await collection.updateOne(
+      { _id: 1 },
+      {
+        $setOnInsert: {
+          english_micro: '',
+          hinglish_micro: '',
+          hinglish_shayari: '',
+        },
+      },
+      { upsert: true },
+    )
+  }
+
+  if (!messagesCollection) {
+    messagesCollection = db.collection('messages')
+  }
+
+  return { collection, messagesCollection }
+}
 
 app.use(cors())
 app.use(express.json())
 
-async function ensureTable() {
-  await pool.query(`
-    CREATE TABLE IF NOT EXISTS writer_content (
-      id INTEGER PRIMARY KEY,
-      english_micro TEXT,
-      hinglish_micro TEXT,
-      hinglish_shayari TEXT
-    );
-  `)
-
-  await pool.query(
-    `INSERT INTO writer_content (id, english_micro, hinglish_micro, hinglish_shayari)
-     VALUES (1, '', '', '')
-     ON CONFLICT (id) DO NOTHING;`,
-  )
-}
-
+// Main content (writer-controlled section)
 app.get('/api/content', async (_req, res) => {
   try {
-    await ensureTable()
-    const { rows } = await pool.query('SELECT * FROM writer_content WHERE id = 1;')
-    const row = rows[0] || {}
+    const { collection: coll } = await initMongo()
+    const doc = (await coll.findOne({ _id: 1 })) || {}
 
     res.json({
-      englishMicro: row.english_micro || '',
-      hinglishMicro: row.hinglish_micro || '',
-      hinglishShayari: row.hinglish_shayari || '',
+      englishMicro: doc.english_micro || '',
+      hinglishMicro: doc.hinglish_micro || '',
+      hinglishShayari: doc.hinglish_shayari || '',
     })
   } catch (err) {
     console.error(err)
@@ -55,20 +79,77 @@ app.put('/api/content', async (req, res) => {
   const { englishMicro, hinglishMicro, hinglishShayari } = req.body || {}
 
   try {
-    await ensureTable()
-    await pool.query(
-      `UPDATE writer_content
-       SET english_micro = $1,
-           hinglish_micro = $2,
-           hinglish_shayari = $3
-       WHERE id = 1;`,
-      [englishMicro || '', hinglishMicro || '', hinglishShayari || ''],
+    const { collection: coll } = await initMongo()
+
+    await coll.updateOne(
+      { _id: 1 },
+      {
+        $set: {
+          english_micro: englishMicro || '',
+          hinglish_micro: hinglishMicro || '',
+          hinglish_shayari: hinglishShayari || '',
+        },
+      },
+      { upsert: true },
     )
 
     res.json({ success: true })
   } catch (err) {
     console.error(err)
     res.status(500).json({ error: 'Failed to save content' })
+  }
+})
+
+// People & Me interaction messages
+app.get('/api/messages', async (_req, res) => {
+  try {
+    const { messagesCollection: msgs } = await initMongo()
+
+    const results = await msgs
+      .find({})
+      .sort({ createdAt: -1 })
+      .limit(20)
+      .toArray()
+
+    const formatted = results.map((m) => ({
+      id: m._id,
+      name: m.name || 'Someone',
+      message: m.message || '',
+      createdAt: m.createdAt,
+    }))
+
+    res.json({ messages: formatted })
+  } catch (err) {
+    console.error(err)
+    res.status(500).json({ error: 'Failed to fetch messages' })
+  }
+})
+
+app.post('/api/messages', async (req, res) => {
+  const { name, message } = req.body || {}
+
+  if (!message || typeof message !== 'string' || !message.trim()) {
+    return res.status(400).json({ error: 'Message is required' })
+  }
+
+  try {
+    const { messagesCollection: msgs } = await initMongo()
+
+    const doc = {
+      name: typeof name === 'string' && name.trim() ? name.trim() : 'Anonymous',
+      message: message.trim(),
+      createdAt: new Date(),
+    }
+
+    const result = await msgs.insertOne(doc)
+
+    res.status(201).json({
+      id: result.insertedId,
+      ...doc,
+    })
+  } catch (err) {
+    console.error(err)
+    res.status(500).json({ error: 'Failed to save message' })
   }
 })
 

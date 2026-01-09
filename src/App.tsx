@@ -14,6 +14,15 @@ function App() {
   const [saving, setSaving] = useState(false)
   const [saveMessage, setSaveMessage] = useState('')
 
+  // People & Me interaction box state
+  const [messages, setMessages] = useState<
+    { id: string; name: string; message: string; createdAt?: string }[]
+  >([])
+  const [guestName, setGuestName] = useState('')
+  const [guestMessage, setGuestMessage] = useState('')
+  const [submittingMessage, setSubmittingMessage] = useState(false)
+  const [messageError, setMessageError] = useState('')
+
   useEffect(() => {
     const load = async () => {
       try {
@@ -28,7 +37,28 @@ function App() {
       }
     }
 
+    const loadMessages = async () => {
+      try {
+        const res = await fetch('http://localhost:3001/api/messages')
+        if (!res.ok) return
+        const data = await res.json()
+        if (Array.isArray(data.messages)) {
+          setMessages(
+            data.messages.map((m: any) => ({
+              id: String(m.id),
+              name: m.name || 'Someone',
+              message: m.message || '',
+              createdAt: m.createdAt,
+            })),
+          )
+        }
+      } catch (err) {
+        console.error(err)
+      }
+    }
+
     load()
+    loadMessages()
   }, [])
 
   const handleSave = async () => {
@@ -54,6 +84,49 @@ function App() {
       setSaveMessage('Error saving to database')
     } finally {
       setSaving(false)
+    }
+  }
+
+  const handleSubmitMessage = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setMessageError('')
+
+    if (!guestMessage.trim()) {
+      setMessageError('Write a few words before sending.')
+      return
+    }
+
+    try {
+      setSubmittingMessage(true)
+      const res = await fetch('http://localhost:3001/api/messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: guestName,
+          message: guestMessage,
+        }),
+      })
+
+      if (!res.ok) throw new Error('Failed to send message')
+
+      const data = await res.json()
+      setMessages((prev) => [
+        {
+          id: String(data.id),
+          name: data.name,
+          message: data.message,
+          createdAt: data.createdAt,
+        },
+        ...prev,
+      ])
+      setGuestMessage('')
+    } catch (err) {
+      console.error(err)
+      setMessageError('Something went wrong while sending your words.')
+    } finally {
+      setSubmittingMessage(false)
     }
   }
 
@@ -231,31 +304,59 @@ function App() {
 
         <section className="section">
           <div className="section-header">
-            <p className="section-eyebrow">Stay connected</p>
-            <h2 className="section-title">Get a piece in your inbox</h2>
+            <p className="section-eyebrow">People &amp; Me</p>
+            <h2 className="section-title">Leave your words for me</h2>
             <p className="section-description">
-              No spam. Just occasional verses, thoughts, and
-              heart-to-heart letters from me.
+              A small box for anything you want to share — a thought, a line,
+              a feeling, or just a hello.
             </p>
           </div>
 
-          <form
-            className="subscribe"
-            onSubmit={(e) => {
-              e.preventDefault()
-              alert('Thank you for subscribing to my poetry!')
-            }}
-          >
-            <input
-              type="email"
-              required
-              placeholder="Your best email address"
-              className="input"
-            />
-            <button type="submit" className="btn btn-primary">
-              Notify me
-            </button>
-          </form>
+          <div className="interaction">
+            <form className="interaction-form" onSubmit={handleSubmitMessage}>
+              <div className="interaction-row">
+                <input
+                  type="text"
+                  placeholder="Your name (optional)"
+                  className="input"
+                  value={guestName}
+                  onChange={(e) => setGuestName(e.target.value)}
+                />
+              </div>
+              <div className="interaction-row">
+                <textarea
+                  className="writer-textarea"
+                  placeholder="Write something to me here…"
+                  value={guestMessage}
+                  onChange={(e) => setGuestMessage(e.target.value)}
+                />
+              </div>
+              <div className="interaction-actions">
+                <button
+                  type="submit"
+                  className="btn btn-primary"
+                  disabled={submittingMessage}
+                >
+                  {submittingMessage ? 'Sending…' : 'Send your words'}
+                </button>
+                {messageError && <p className="save-message">{messageError}</p>}
+              </div>
+            </form>
+
+            {messages.length > 0 && (
+              <div className="interaction-messages">
+                <h3 className="section-title">Recent whispers</h3>
+                <ul>
+                  {messages.map((m) => (
+                    <li key={m.id} className="interaction-message">
+                      <p className="interaction-name">{m.name}</p>
+                      <p className="interaction-text">{m.message}</p>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
         </section>
       </main>
 
