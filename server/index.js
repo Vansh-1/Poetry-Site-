@@ -6,8 +6,12 @@ const { Pool } = require('pg')
 const app = express()
 const port = process.env.PORT || 3001
 
+// Prefer DATABASE_URL for compatibility, but fall back to STACK_SECRET_SERVER_KEY
+const connectionString =
+  process.env.DATABASE_URL || process.env.STACK_SECRET_SERVER_KEY
+
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
+  connectionString,
 })
 
 app.use(cors())
