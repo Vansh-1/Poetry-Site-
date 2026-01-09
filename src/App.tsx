@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import './App.css'
 
 function App() {
@@ -87,7 +87,7 @@ function App() {
     }
   }
 
-  const handleSubmitMessage = async (e: React.FormEvent) => {
+  const handleSubmitMessage = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setMessageError('')
 
