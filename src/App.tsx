@@ -305,57 +305,63 @@ function App() {
         <section className="section">
           <div className="section-header">
             <p className="section-eyebrow">People &amp; Me</p>
-            <h2 className="section-title">Leave your words for me</h2>
+            <h2 className="section-title">Random chat corner</h2>
             <p className="section-description">
-              A small box for anything you want to share — a thought, a line,
-              a feeling, or just a hello.
+              Not a newsletter, not a form — just a tiny chat space where you
+              and I can drop thoughts, lines, and late-night feelings.
             </p>
           </div>
 
-          <div className="interaction">
-            <form className="interaction-form" onSubmit={handleSubmitMessage}>
-              <div className="interaction-row">
-                <input
-                  type="text"
-                  placeholder="Your name (optional)"
-                  className="input"
-                  value={guestName}
-                  onChange={(e) => setGuestName(e.target.value)}
-                />
-              </div>
-              <div className="interaction-row">
-                <textarea
-                  className="writer-textarea"
-                  placeholder="Write something to me here…"
-                  value={guestMessage}
-                  onChange={(e) => setGuestMessage(e.target.value)}
-                />
-              </div>
+          <div className="interaction chat-box">
+            {/* Chat history */}
+            <div className="chat-messages">
+              {messages.length === 0 ? (
+                <p className="chat-empty">
+                  No messages yet. Be the first one to say something.
+                </p>
+              ) : (
+                <ul>
+                  {messages.map((m, index) => (
+                    <li
+                      key={m.id}
+                      className={
+                        'chat-bubble ' + (index % 2 === 0 ? 'chat-bubble-them' : 'chat-bubble-me')
+                      }
+                    >
+                      <p className="chat-name">{index % 2 === 0 ? m.name : 'Vansh'}</p>
+                      <p className="chat-text">{m.message}</p>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+
+            {/* Input area */}
+            <form className="chat-input" onSubmit={handleSubmitMessage}>
+              <input
+                type="text"
+                placeholder="Your name (optional)"
+                className="input chat-name-input"
+                value={guestName}
+                onChange={(e) => setGuestName(e.target.value)}
+              />
+              <textarea
+                className="writer-textarea chat-textarea"
+                placeholder="Type a message like you would in a DM…"
+                value={guestMessage}
+                onChange={(e) => setGuestMessage(e.target.value)}
+              />
               <div className="interaction-actions">
                 <button
                   type="submit"
                   className="btn btn-primary"
                   disabled={submittingMessage}
                 >
-                  {submittingMessage ? 'Sending…' : 'Send your words'}
+                  {submittingMessage ? 'Sending…' : 'Send'}
                 </button>
                 {messageError && <p className="save-message">{messageError}</p>}
               </div>
             </form>
-
-            {messages.length > 0 && (
-              <div className="interaction-messages">
-                <h3 className="section-title">Recent whispers</h3>
-                <ul>
-                  {messages.map((m) => (
-                    <li key={m.id} className="interaction-message">
-                      <p className="interaction-name">{m.name}</p>
-                      <p className="interaction-text">{m.message}</p>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
           </div>
         </section>
       </main>
