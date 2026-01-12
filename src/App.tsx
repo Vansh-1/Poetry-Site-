@@ -14,10 +14,7 @@ function App() {
   const [saving, setSaving] = useState(false)
   const [saveMessage, setSaveMessage] = useState('')
 
-  // People & Me interaction box state
-  const [messages, setMessages] = useState<
-    { id: string; name: string; message: string; createdAt?: string }[]
-  >([])
+  // People & Me interaction box state (we only send to DB, not show history)
   const [guestName, setGuestName] = useState('')
   const [guestMessage, setGuestMessage] = useState('')
   const [submittingMessage, setSubmittingMessage] = useState(false)
@@ -37,28 +34,7 @@ function App() {
       }
     }
 
-    const loadMessages = async () => {
-      try {
-        const res = await fetch('/api/messages')
-        if (!res.ok) return
-        const data = await res.json()
-        if (Array.isArray(data.messages)) {
-          setMessages(
-            data.messages.map((m: any) => ({
-              id: String(m.id),
-              name: m.name || 'Someone',
-              message: m.message || '',
-              createdAt: m.createdAt,
-            })),
-          )
-        }
-      } catch (err) {
-        console.error(err)
-      }
-    }
-
     load()
-    loadMessages()
   }, [])
 
   const handleSave = async () => {
@@ -112,15 +88,8 @@ function App() {
       if (!res.ok) throw new Error('Failed to send message')
 
       const data = await res.json()
-      setMessages((prev) => [
-        {
-          id: String(data.id),
-          name: data.name,
-          message: data.message,
-          createdAt: data.createdAt,
-        },
-        ...prev,
-      ])
+      // We don't show past messages on screen, just clear the box after saving.
+      console.debug('Saved message to DB', data)
       setGuestMessage('')
     } catch (err) {
       console.error(err)
@@ -313,32 +282,8 @@ function App() {
           </div>
 
           <div className="interaction chat-box">
-            {/* Chat history */}
-            <div className="chat-messages">
-              {messages.length === 0 ? (
-                <p className="chat-empty">
-                  No messages yet. Be the first one to say something.
-                </p>
-              ) : (
-                <ul>
-                  {messages.map((m, index) => (
-                    <li
-                      key={m.id}
-                      className={
-                        'chat-bubble ' + (index % 2 === 0 ? 'chat-bubble-them' : 'chat-bubble-me')
-                      }
-                    >
-                      <p className="chat-name">{index % 2 === 0 ? m.name : 'Vansh'}</p>
-                      <p className="chat-text">{m.message}</p>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
-
-            {/* Input area */}
+            {/* We keep this as a private box: messages go to the database only. */}
             <form className="chat-input" onSubmit={handleSubmitMessage}>
-              <input
                 type="text"
                 placeholder="Your name (optional)"
                 className="input chat-name-input"
