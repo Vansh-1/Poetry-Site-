@@ -138,7 +138,7 @@ function App() {
           <p className="hero-tag">Poety • Shayari • Stories</p>
           <h1 className="hero-title">Whispers of the Heart</h1>
           <p className="hero-subtitle">
-            Soulful <span>Hindi</span> and <span>English</span> words, crafted to
+            Soulful <span>Hindi</span> and <span>Enlish</span> words, crafted to
             heal, inspire, and stay with you long after you&apos;ve left.
           </p>
           <div className="hero-actions">
