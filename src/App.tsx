@@ -284,6 +284,7 @@ function App() {
           <div className="interaction chat-box">
             {/* We keep this as a private box: messages go to the database only. */}
             <form className="chat-input" onSubmit={handleSubmitMessage}>
+              <input
                 type="text"
                 placeholder="Your name (optional)"
                 className="input chat-name-input"
