@@ -48,15 +48,12 @@ function App() {
       }
     }
 
-    // decide route based on path
+    // decide route based on query ?editor=1
     try {
       if (typeof window !== 'undefined') {
-        const path = window.location.pathname
-        if (path === '/editor') {
-          setRoute('editor')
-        } else {
-          setRoute('viewer')
-        }
+        const params = new URLSearchParams(window.location.search)
+        const isEditor = params.get('editor') === '1'
+        setRoute(isEditor ? 'editor' : 'viewer')
       }
     } catch (err) {
       console.error(err)
