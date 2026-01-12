@@ -11,8 +11,22 @@ function App() {
   const [hinglishShayari, setHinglishShayari] = useState(
     'Raat ki siyahi mein teri yaadein ghulti rahi,\ndil ne har dhadkan par tera naam likh daala.',
   )
+
+  // Simple routing: normal visitors at "/" (viewer), you at "/editor" (editor)
+  const [route, setRoute] = useState<'viewer' | 'editor'>('viewer')
+
+  // Which piece is currently being read (acts like 3 separate pages)
+  const [activePiece, setActivePiece] = useState<
+    'english' | 'hinglishMicro' | 'hinglishShayari'
+  >('english')
+
+  // Writer controls state
   const [saving, setSaving] = useState(false)
   const [saveMessage, setSaveMessage] = useState('')
+  const [isWriter, setIsWriter] = useState(false)
+  const [writerSecret, setWriterSecret] = useState('')
+  const [writerKeyInput, setWriterKeyInput] = useState('')
+  const [writerAuthError, setWriterAuthError] = useState('')
 
   // People & Me interaction box state (we only send to DB, not show history)
   const [guestName, setGuestName] = useState('')
@@ -34,18 +48,51 @@ function App() {
       }
     }
 
+    // decide route based on path
+    try {
+      if (typeof window !== 'undefined') {
+        const path = window.location.pathname
+        if (path === '/editor') {
+          setRoute('editor')
+        } else {
+          setRoute('viewer')
+        }
+      }
+    } catch (err) {
+      console.error(err)
+    }
+
     load()
+  }, [])
+
+  // Load writer secret from localStorage (so only you can save)
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem('writerSecret')
+      if (stored) {
+        setWriterSecret(stored)
+        setIsWriter(true)
+      }
+    } catch (err) {
+      console.error(err)
+    }
   }, [])
 
   const handleSave = async () => {
     try {
       setSaving(true)
       setSaveMessage('')
+      const headers: HeadersInit = {
+        'Content-Type': 'application/json',
+      }
+      if (writerSecret) {
+        // This header is checked on the server so only you can write
+        ;(headers as any)['x-writer-secret'] = writerSecret
+      }
+
       const res = await fetch('/api/content', {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers,
         body: JSON.stringify({
           englishMicro,
           hinglishMicro,
@@ -53,13 +100,38 @@ function App() {
         }),
       })
 
-      if (!res.ok) throw new Error('Failed to save')
+      if (!res.ok) {
+        if (res.status === 403) {
+          setIsWriter(false)
+          setSaveMessage('You are not allowed to save. Enter your writer key.')
+          return
+        }
+        throw new Error('Failed to save')
+      }
+
       setSaveMessage('Saved to database ✅')
     } catch (err) {
       console.error(err)
-      setSaveMessage('Error saving to database')
+      if (!saveMessage) setSaveMessage('Error saving to database')
     } finally {
       setSaving(false)
+    }
+  }
+
+  const handleWriterLogin = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    const trimmed = writerKeyInput.trim()
+    if (!trimmed) {
+      setWriterAuthError('Enter your writer key to unlock editing.')
+      return
+    }
+    setWriterSecret(trimmed)
+    setIsWriter(true)
+    setWriterAuthError('')
+    try {
+      localStorage.setItem('writerSecret', trimmed)
+    } catch (err) {
+      console.error(err)
     }
   }
 
@@ -127,55 +199,87 @@ function App() {
             <p className="section-eyebrow">Start reading</p>
             <h2 className="section-title">Micro Tales & Shayari</h2>
             <p className="section-description">
-              Short, sharp feelings you can read in seconds and feel for hours.
+              Choose a section to read — English, Hinglish micro, or full shayari.
             </p>
           </div>
 
-          <div className="grid">
-            {/* 1 — Micro Tales in English */}
-            <article className="card poem">
-              <p className="pill">Micro Tale • English</p>
-              <h3 className="card-title">Almost Love</h3>
-              <p className="card-snippet">
-                {englishMicro.split('\n').map((line) => (
-                  <>
-                    {line}
-                    <br />
-                  </>
-                ))}
-              </p>
-              <button className="read-more">More micro tales</button>
-            </article>
+          {/* Simple tabs to act like 3 separate pages */}
+          <div className="piece-tabs">
+            <button
+              type="button"
+              className={
+                'btn tab-btn ' + (activePiece === 'english' ? 'tab-btn-active' : '')
+              }
+              onClick={() => setActivePiece('english')}
+            >
+              English micro tale
+            </button>
+            <button
+              type="button"
+              className={
+                'btn tab-btn ' + (activePiece === 'hinglishMicro' ? 'tab-btn-active' : '')
+              }
+              onClick={() => setActivePiece('hinglishMicro')}
+            >
+              Hinglish micro
+            </button>
+            <button
+              type="button"
+              className={
+                'btn tab-btn ' +
+                (activePiece === 'hinglishShayari' ? 'tab-btn-active' : '')
+              }
+              onClick={() => setActivePiece('hinglishShayari')}
+            >
+              Full shayari
+            </button>
+          </div>
 
-            {/* 2 — Hindi emotions written in English letters */}
-            <article className="card poem">
-              <p className="pill">Micro Tale • Hindi (English script)</p>
-              <h3 className="card-title">Adhoori Baat</h3>
-              <p className="card-snippet">
-                {hinglishMicro.split('\n').map((line) => (
-                  <>
-                    {line}
-                    <br />
-                  </>
-                ))}
-              </p>
-              <button className="read-more">Read more in Hinglish</button>
-            </article>
+          <div className="piece-panel">
+            {activePiece === 'english' && (
+              <article className="card poem">
+                <p className="pill">Micro Tale • English</p>
+                <h3 className="card-title">Almost Love</h3>
+                <p className="card-snippet">
+                  {englishMicro.split('\n').map((line, idx) => (
+                    <span key={idx}>
+                      {line}
+                      <br />
+                    </span>
+                  ))}
+                </p>
+              </article>
+            )}
 
-            {/* 3 — Pure Shayari (Hindi in English letters) */}
-            <article className="card poem">
-              <p className="pill">Shayari • Hinglish</p>
-              <h3 className="card-title">Raat Ki Siyahi</h3>
-              <p className="card-snippet">
-                {hinglishShayari.split('\n').map((line) => (
-                  <>
-                    {line}
-                    <br />
-                  </>
-                ))}
-              </p>
-              <button className="read-more">More shayari</button>
-            </article>
+            {activePiece === 'hinglishMicro' && (
+              <article className="card poem">
+                <p className="pill">Micro Tale • Hindi (English script)</p>
+                <h3 className="card-title">Adhoori Baat</h3>
+                <p className="card-snippet">
+                  {hinglishMicro.split('\n').map((line, idx) => (
+                    <span key={idx}>
+                      {line}
+                      <br />
+                    </span>
+                  ))}
+                </p>
+              </article>
+            )}
+
+            {activePiece === 'hinglishShayari' && (
+              <article className="card poem">
+                <p className="pill">Shayari • Hinglish</p>
+                <h3 className="card-title">Raat Ki Siyahi</h3>
+                <p className="card-snippet">
+                  {hinglishShayari.split('\n').map((line, idx) => (
+                    <span key={idx}>
+                      {line}
+                      <br />
+                    </span>
+                  ))}
+                </p>
+              </article>
+            )}
           </div>
         </section>
 
@@ -213,14 +317,15 @@ function App() {
           </div>
         </section>
 
-        {/* Writer controls */}
-        <section className="section section-writer" id="writer">
+        {/* Writer controls — only visible on /editor route */}
+        {route === 'editor' && (
+          <section className="section section-writer" id="writer">
           <div className="section-header">
             <p className="section-eyebrow">Writer&apos;s Corner</p>
             <h2 className="section-title">Update your lines</h2>
             <p className="section-description">
-              Use these boxes to quickly update what readers see in the three
-              cards above. Changes are local to your browser for now.
+              Only you can edit and save to the database. Visitors can read, but
+              they can&apos;t change the words.
             </p>
           </div>
 
@@ -232,6 +337,7 @@ function App() {
                 className="writer-textarea"
                 value={englishMicro}
                 onChange={(e) => setEnglishMicro(e.target.value)}
+                disabled={!isWriter}
               />
             </div>
 
@@ -244,6 +350,7 @@ function App() {
                 className="writer-textarea"
                 value={hinglishMicro}
                 onChange={(e) => setHinglishMicro(e.target.value)}
+                disabled={!isWriter}
               />
             </div>
 
@@ -254,6 +361,7 @@ function App() {
                 className="writer-textarea"
                 value={hinglishShayari}
                 onChange={(e) => setHinglishShayari(e.target.value)}
+                disabled={!isWriter}
               />
             </div>
           </div>
@@ -263,13 +371,31 @@ function App() {
               type="button"
               className="btn btn-primary"
               onClick={handleSave}
-              disabled={saving}
+              disabled={saving || !isWriter}
             >
               {saving ? 'Saving…' : 'Save all to database'}
             </button>
             {saveMessage && <p className="save-message">{saveMessage}</p>}
           </div>
+
+          <div className="writer-auth">
+            <p className="section-description">Writer login (only you know this key)</p>
+            <form className="writer-auth-form" onSubmit={handleWriterLogin}>
+              <input
+                type="password"
+                placeholder="Enter writer key to unlock editing"
+                className="input"
+                value={writerKeyInput}
+                onChange={(e) => setWriterKeyInput(e.target.value)}
+              />
+              <button type="submit" className="btn btn-ghost">
+                Unlock writer mode
+              </button>
+            </form>
+            {writerAuthError && <p className="save-message">{writerAuthError}</p>}
+          </div>
         </section>
+        )}
 
         <section className="section">
           <div className="section-header">

@@ -1,5 +1,7 @@
 import { getMongo } from './_mongo.js'
 
+const writerSecret = process.env.WRITER_SECRET
+
 export default async function handler(req, res) {
   const { method } = req
 
@@ -18,6 +20,14 @@ export default async function handler(req, res) {
 
     if (method === 'PUT') {
       const { englishMicro, hinglishMicro, hinglishShayari } = req.body || {}
+
+      // Only allow updates if the correct writer secret header is present
+      if (writerSecret) {
+        const provided = req.headers['x-writer-secret']
+        if (!provided || provided !== writerSecret) {
+          return res.status(403).json({ error: 'Not allowed to update content' })
+        }
+      }
 
       await contentCollection.updateOne(
         { _id: 1 },
