@@ -285,16 +285,16 @@ function App() {
             <div className="about-highlight" />
             <div className="about-content">
               <p className="section-eyebrow">About the writer</p>
-              <h2 className="section-title">Vansh — a heart that writes</h2>
+              <h2 className="section-title">Vansh — A heart that writes</h2>
               <p className="section-description">
                 This space is a safe corner of the internet for overthinkers,
                 silent lovers, night owls, and old-school romantics. Every
-                piece is drawn from real emotions — yours, mine, ours.
+                piece is drawn from real emotions yours, mine, ours.
               </p>
               <p className="section-description">
                 Whether you&apos;re here for healing, nostalgia, or just a
                 beautifully written line to send someone special, stay a
-                while — you might find your feelings put into words.
+                while, you might find your feelings put into words.
               </p>
               <div className="about-meta">
                 <div>
@@ -399,7 +399,7 @@ function App() {
             <p className="section-eyebrow">People &amp; Me</p>
             <h2 className="section-title">Random chat corner</h2>
             <p className="section-description">
-              Not a newsletter, not a form — just a tiny chat space where you
+              Not a newsletter, not a form, Just a tiny chat space where you
               and I can drop thoughts, lines, and late-night feelings.
             </p>
           </div>
@@ -436,7 +436,7 @@ function App() {
       </main>
 
       <footer className="footer">
-        <p>© {new Date().getFullYear()} Pinak • Poetry & Shayari</p>
+        <p>© {new Date().getFullYear()} Vansh • Poetry & Shayari</p>
         <p className="footer-note">
           Crafted with love, late nights, and way too much overthinking.
         </p>
