@@ -132,6 +132,50 @@ function App() {
     }
   }
 
+  const handleDeletePiece = async (
+    piece: 'english' | 'hinglishMicro' | 'hinglishShayari',
+  ) => {
+    if (!isWriter) return
+
+    try {
+      setSaving(true)
+      setSaveMessage('')
+      const headers: HeadersInit = {
+        'Content-Type': 'application/json',
+      }
+      if (writerSecret) {
+        ;(headers as any)['x-writer-secret'] = writerSecret
+      }
+
+      const res = await fetch('/api/content', {
+        method: 'DELETE',
+        headers,
+        body: JSON.stringify({ piece }),
+      })
+
+      if (!res.ok) {
+        if (res.status === 403) {
+          setIsWriter(false)
+          setSaveMessage('You are not allowed to delete. Enter your writer key.')
+          return
+        }
+        throw new Error('Failed to delete')
+      }
+
+      // Update local state so UI matches DB
+      if (piece === 'english') setEnglishMicro('')
+      if (piece === 'hinglishMicro') setHinglishMicro('')
+      if (piece === 'hinglishShayari') setHinglishShayari('')
+
+      setSaveMessage('Deleted successfully ✅')
+    } catch (err) {
+      console.error(err)
+      if (!saveMessage) setSaveMessage('Error deleting from database')
+    } finally {
+      setSaving(false)
+    }
+  }
+
   const handleSubmitMessage = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setMessageError('')
@@ -336,9 +380,7 @@ function App() {
                 onChange={(e) => setEnglishMicro(e.target.value)}
                 disabled={!isWriter}
               />
-            </div>
-
-            <div className="writer-card">
+              {isWri            <div className="writer-card">
               <p className="pill">Micro Tale • Hinglish</p>
               <label className="writer-label">
                 Hindi feelings written in English letters
@@ -349,9 +391,16 @@ function App() {
                 onChange={(e) => setHinglishMicro(e.target.value)}
                 disabled={!isWriter}
               />
-            </div>
-
-            <div className="writer-card">
+              {isWriter && (
+                <button
+                  type="button"
+                  className="btn btn-ghost writer-delete-btn"
+                  onClick={() => handleDeletePiece('hinglishMicro')}
+                >
+                  Delete this piece
+                </button>
+              )}
+            </            <div className="writer-card">
               <p className="pill">Shayari • Hinglish</p>
               <label className="writer-label">Lines shown in third card</label>
               <textarea
@@ -360,6 +409,15 @@ function App() {
                 onChange={(e) => setHinglishShayari(e.target.value)}
                 disabled={!isWriter}
               />
+              {isWriter && (
+                <button
+                  type="button"
+                  className="btn btn-ghost writer-delete-btn"
+                  onClick={() => handleDeletePiece('hinglishShayari')}
+                >
+                  Delete this piece
+                </button>
+              )}
             </div>
           </div>
 

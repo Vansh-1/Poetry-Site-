@@ -66,7 +66,42 @@ export default async function handler(req, res) {
       return res.status(200).json({ success: true })
     }
 
-    res.setHeader('Allow', ['GET', 'PUT'])
+    if (method === 'DELETE') {
+      const { piece } = req.body || {}
+
+      if (writerSecret) {
+        const provided = req.headers['x-writer-secret']
+        if (!provided || provided !== writerSecret) {
+          return res.status(403).json({ error: 'Not allowed to delete content' })
+        }
+      }
+
+      if (piece === 'english') {
+        await englishCollection.updateOne(
+          { _id: 1 },
+          { $set: { text: '' } },
+          { upsert: true },
+        )
+      } else if (piece === 'hinglishMicro') {
+        await hinglishMicroCollection.updateOne(
+          { _id: 1 },
+          { $set: { text: '' } },
+          { upsert: true },
+        )
+      } else if (piece === 'hinglishShayari') {
+        await shayariCollection.updateOne(
+          { _id: 1 },
+          { $set: { text: '' } },
+          { upsert: true },
+        )
+      } else {
+        return res.status(400).json({ error: 'Unknown piece to delete' })
+      }
+
+      return res.status(200).json({ success: true })
+    }
+
+    res.setHeader('Allow', ['GET', 'PUT', 'DELETE'])
     return res.status(405).end(`Method ${method} Not Allowed`)
   } catch (err) {
     console.error(err)
