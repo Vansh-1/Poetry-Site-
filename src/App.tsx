@@ -361,95 +361,113 @@ function App() {
         {/* Writer controls — only visible on /editor route */}
         {route === 'editor' && (
           <section className="section section-writer" id="writer">
-          <div className="section-header">
-            <p className="section-eyebrow">Writer&apos;s Corner</p>
-            <h2 className="section-title">Update your lines</h2>
-            <p className="section-description">
-              Only you can edit and save to the database. Visitors can read, but
-              they can&apos;t change the words.
-            </p>
-          </div>
-
-          <div className="writer-grid">
-            <div className="writer-card">
-              <p className="pill">Micro Tale • English</p>
-              <label className="writer-label">Lines shown in first card</label>
-              <textarea
-                className="writer-textarea"
-                value={englishMicro}
-                onChange={(e) => setEnglishMicro(e.target.value)}
-                disabled={!isWriter}
-              />
-              {isWri            <div className="writer-card">
-              <p className="pill">Micro Tale • Hinglish</p>
-              <label className="writer-label">
-                Hindi feelings written in English letters
-              </label>
-              <textarea
-                className="writer-textarea"
-                value={hinglishMicro}
-                onChange={(e) => setHinglishMicro(e.target.value)}
-                disabled={!isWriter}
-              />
-              {isWriter && (
-                <button
-                  type="button"
-                  className="btn btn-ghost writer-delete-btn"
-                  onClick={() => handleDeletePiece('hinglishMicro')}
-                >
-                  Delete this piece
-                </button>
-              )}
-            </            <div className="writer-card">
-              <p className="pill">Shayari • Hinglish</p>
-              <label className="writer-label">Lines shown in third card</label>
-              <textarea
-                className="writer-textarea"
-                value={hinglishShayari}
-                onChange={(e) => setHinglishShayari(e.target.value)}
-                disabled={!isWriter}
-              />
-              {isWriter && (
-                <button
-                  type="button"
-                  className="btn btn-ghost writer-delete-btn"
-                  onClick={() => handleDeletePiece('hinglishShayari')}
-                >
-                  Delete this piece
-                </button>
-              )}
+            <div className="section-header">
+              <p className="section-eyebrow">Writer&apos;s Corner</p>
+              <h2 className="section-title">Update your lines</h2>
+              <p className="section-description">
+                Only you can edit and save to the database. Visitors can read,
+                but they can&apos;t change the words.
+              </p>
             </div>
-          </div>
 
-          <div className="writer-actions">
-            <button
-              type="button"
-              className="btn btn-primary"
-              onClick={handleSave}
-              disabled={saving || !isWriter}
-            >
-              {saving ? 'Saving…' : 'Save all to database'}
-            </button>
-            {saveMessage && <p className="save-message">{saveMessage}</p>}
-          </div>
+            <div className="writer-grid">
+              {/* English micro card */}
+              <div className="writer-card">
+                <p className="pill">Micro Tale • English</p>
+                <label className="writer-label">Lines shown in first card</label>
+                <textarea
+                  className="writer-textarea"
+                  value={englishMicro}
+                  onChange={(e) => setEnglishMicro(e.target.value)}
+                  disabled={!isWriter}
+                />
+                {isWriter && (
+                  <button
+                    type="button"
+                    className="btn btn-ghost writer-delete-btn"
+                    onClick={() => handleDeletePiece('english')}
+                  >
+                    Delete this piece
+                  </button>
+                )}
+              </div>
 
-          <div className="writer-auth">
-            <p className="section-description">Writer login (only you know this key)</p>
-            <form className="writer-auth-form" onSubmit={handleWriterLogin}>
-              <input
-                type="password"
-                placeholder="Enter writer key to unlock editing"
-                className="input"
-                value={writerKeyInput}
-                onChange={(e) => setWriterKeyInput(e.target.value)}
-              />
-              <button type="submit" className="btn btn-ghost">
-                Unlock writer mode
+              {/* Hinglish micro card */}
+              <div className="writer-card">
+                <p className="pill">Micro Tale • Hinglish</p>
+                <label className="writer-label">
+                  Hindi feelings written in English letters
+                </label>
+                <textarea
+                  className="writer-textarea"
+                  value={hinglishMicro}
+                  onChange={(e) => setHinglishMicro(e.target.value)}
+                  disabled={!isWriter}
+                />
+                {isWriter && (
+                  <button
+                    type="button"
+                    className="btn btn-ghost writer-delete-btn"
+                    onClick={() => handleDeletePiece('hinglishMicro')}
+                  >
+                    Delete this piece
+                  </button>
+                )}
+              </div>
+
+              {/* Hinglish shayari card */}
+              <div className="writer-card">
+                <p className="pill">Shayari • Hinglish</p>
+                <label className="writer-label">Lines shown in third card</label>
+                <textarea
+                  className="writer-textarea"
+                  value={hinglishShayari}
+                  onChange={(e) => setHinglishShayari(e.target.value)}
+                  disabled={!isWriter}
+                />
+                {isWriter && (
+                  <button
+                    type="button"
+                    className="btn btn-ghost writer-delete-btn"
+                    onClick={() => handleDeletePiece('hinglishShayari')}
+                  >
+                    Delete this piece
+                  </button>
+                )}
+              </div>
+            </div>
+
+            <div className="writer-actions">
+              <button
+                type="button"
+                className="btn btn-primary"
+                onClick={handleSave}
+                disabled={saving || !isWriter}
+              >
+                {saving ? 'Saving…' : 'Save all to database'}
               </button>
-            </form>
-            {writerAuthError && <p className="save-message">{writerAuthError}</p>}
-          </div>
-        </section>
+              {saveMessage && <p className="save-message">{saveMessage}</p>}
+            </div>
+
+            <div className="writer-auth">
+              <p className="section-description">
+                Writer login (only you know this key)
+              </p>
+              <form className="writer-auth-form" onSubmit={handleWriterLogin}>
+                <input
+                  type="password"
+                  placeholder="Enter writer key to unlock editing"
+                  className="input"
+                  value={writerKeyInput}
+                  onChange={(e) => setWriterKeyInput(e.target.value)}
+                />
+                <button type="submit" className="btn btn-ghost">
+                  Unlock writer mode
+                </button>
+              </form>
+              {writerAuthError && <p className="save-message">{writerAuthError}</p>}
+            </div>
+          </section>
         )}
 
         <section className="section">
