@@ -8,7 +8,9 @@ if (!mongoUri) {
 
 let client
 let db
-let contentCollection
+let englishCollection
+let hinglishMicroCollection
+let shayariCollection
 let messagesCollection
 
 export async function getMongo() {
@@ -22,15 +24,39 @@ export async function getMongo() {
     db = client.db('poetry_site')
   }
 
-  if (!contentCollection) {
-    contentCollection = db.collection('writer_content')
-    await contentCollection.updateOne(
+  if (!englishCollection) {
+    englishCollection = db.collection('english_micro')
+    await englishCollection.updateOne(
       { _id: 1 },
       {
         $setOnInsert: {
-          english_micro: '',
-          hinglish_micro: '',
-          hinglish_shayari: '',
+          text: '',
+        },
+      },
+      { upsert: true },
+    )
+  }
+
+  if (!hinglishMicroCollection) {
+    hinglishMicroCollection = db.collection('hinglish_micro')
+    await hinglishMicroCollection.updateOne(
+      { _id: 1 },
+      {
+        $setOnInsert: {
+          text: '',
+        },
+      },
+      { upsert: true },
+    )
+  }
+
+  if (!shayariCollection) {
+    shayariCollection = db.collection('hinglish_shayari')
+    await shayariCollection.updateOne(
+      { _id: 1 },
+      {
+        $setOnInsert: {
+          text: '',
         },
       },
       { upsert: true },
@@ -41,5 +67,10 @@ export async function getMongo() {
     messagesCollection = db.collection('messages')
   }
 
-  return { contentCollection, messagesCollection }
+  return {
+    englishCollection,
+    hinglishMicroCollection,
+    shayariCollection,
+    messagesCollection,
+  }
 }

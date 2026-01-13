@@ -6,15 +6,19 @@ export default async function handler(req, res) {
   const { method } = req
 
   try {
-    const { contentCollection } = await getMongo()
+    const { englishCollection, hinglishMicroCollection, shayariCollection } =
+      await getMongo()
 
     if (method === 'GET') {
-      const doc = (await contentCollection.findOne({ _id: 1 })) || {}
+      const englishDoc = (await englishCollection.findOne({ _id: 1 })) || {}
+      const hinglishMicroDoc =
+        (await hinglishMicroCollection.findOne({ _id: 1 })) || {}
+      const shayariDoc = (await shayariCollection.findOne({ _id: 1 })) || {}
 
       return res.status(200).json({
-        englishMicro: doc.english_micro || '',
-        hinglishMicro: doc.hinglish_micro || '',
-        hinglishShayari: doc.hinglish_shayari || '',
+        englishMicro: englishDoc.text || '',
+        hinglishMicro: hinglishMicroDoc.text || '',
+        hinglishShayari: shayariDoc.text || '',
       })
     }
 
@@ -29,13 +33,31 @@ export default async function handler(req, res) {
         }
       }
 
-      await contentCollection.updateOne(
+      await englishCollection.updateOne(
         { _id: 1 },
         {
           $set: {
-            english_micro: englishMicro || '',
-            hinglish_micro: hinglishMicro || '',
-            hinglish_shayari: hinglishShayari || '',
+            text: englishMicro || '',
+          },
+        },
+        { upsert: true },
+      )
+
+      await hinglishMicroCollection.updateOne(
+        { _id: 1 },
+        {
+          $set: {
+            text: hinglishMicro || '',
+          },
+        },
+        { upsert: true },
+      )
+
+      await shayariCollection.updateOne(
+        { _id: 1 },
+        {
+          $set: {
+            text: hinglishShayari || '',
           },
         },
         { upsert: true },
