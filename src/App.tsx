@@ -289,6 +289,15 @@ function App() {
                     </span>
                   ))}
                 </p>
+                {isWriter && (
+                  <button
+                    type="button"
+                    className="btn btn-ghost writer-delete-btn"
+                    onClick={() => handleDeletePiece('english')}
+                  >
+                    Delete this piece
+                  </button>
+                )}
               </article>
             )}
 
@@ -304,6 +313,15 @@ function App() {
                     </span>
                   ))}
                 </p>
+                {isWriter && (
+                  <button
+                    type="button"
+                    className="btn btn-ghost writer-delete-btn"
+                    onClick={() => handleDeletePiece('hinglishMicro')}
+                  >
+                    Delete this piece
+                  </button>
+                )}
               </article>
             )}
 
@@ -319,6 +337,15 @@ function App() {
                     </span>
                   ))}
                 </p>
+                {isWriter && (
+                  <button
+                    type="button"
+                    className="btn btn-ghost writer-delete-btn"
+                    onClick={() => handleDeletePiece('hinglishShayari')}
+                  >
+                    Delete this piece
+                  </button>
+                )}
               </article>
             )}
           </div>
