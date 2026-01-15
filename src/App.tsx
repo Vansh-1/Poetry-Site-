@@ -247,101 +247,27 @@ function App() {
         <section id="featured" className="section">
           <div className="section-header">
             <p className="section-eyebrow">Start reading</p>
-            <h2 className="section-title">Micro Tales & Shayari</h2>
+            <h2 className="section-title">Shayari</h2>
             <p className="section-description">
-              Choose a section to read — English, Hinglish micro, or full shayari.
+              All your shayari pieces, newest at the top.
             </p>
           </div>
 
-          {/* Simple tabs to act like 3 separate pages */}
-          <div className="piece-tabs">
-            <button
-              type="button"
-              className={
-                'btn tab-btn ' + (activePiece === 'english' ? 'tab-btn-active' : '')
-              }
-              onClick={() => setActivePiece('english')}
-            >
-              English micro tale
-            </button>
-            <button
-              type="button"
-              className={
-                'btn tab-btn ' + (activePiece === 'hinglishMicro' ? 'tab-btn-active' : '')
-              }
-              onClick={() => setActivePiece('hinglishMicro')}
-            >
-              Hinglish micro
-            </button>
-            <button
-              type="button"
-              className={
-                'btn tab-btn ' +
-                (activePiece === 'hinglishShayari' ? 'tab-btn-active' : '')
-              }
-              onClick={() => setActivePiece('hinglishShayari')}
-            >
-              Full shayari
-            </button>
-          </div>
-
           <div className="piece-panel">
-            {activePiece === 'english' && (
-              <>
-                {splitTales(englishMicro).map((tale, index) => (
-                  <article key={index} className="card poem">
-                    <p className="pill">Micro Tale • English</p>
-                    <h3 className="card-title">Almost Love</h3>
-                    <p className="card-snippet">
-                      {tale.split('\n').map((line, idx) => (
-                        <span key={idx}>
-                          {line}
-                          <br />
-                        </span>
-                      ))}
-                    </p>
-                  </article>
-                ))}
-              </>
-            )}
-
-            {activePiece === 'hinglishMicro' && (
-              <>
-                {splitTales(hinglishMicro).map((tale, index) => (
-                  <article key={index} className="card poem">
-                    <p className="pill">Micro Tale • Hindi (English script)</p>
-                    <h3 className="card-title">Adhoori Baat</h3>
-                    <p className="card-snippet">
-                      {tale.split('\n').map((line, idx) => (
-                        <span key={idx}>
-                          {line}
-                          <br />
-                        </span>
-                      ))}
-                    </p>
-                  </article>
-                ))}
-              </>
-            )}
-
-            {activePiece === 'hinglishShayari' && (
-              <>
-                {splitTales(hinglishShayari).map((tale, index) => (
-                  <article key={index} className="card poem">
-                    <p className="pill">Shayari • Hinglish</p>
-                    <h3 className="card-title">Raat Ki Siyahi</h3>
-                    <p className="card-snippet">
-                      {tale.split('\n').map((line, idx) => (
-                        <span key={idx}>
-                          {line}
-                          <br />
-                        </span>
-                      ))}
-                    </p>
-                  </article>
-                ))}
-              </>
-            )}
+            {splitTales(hinglishShayari).map((tale, index) => (
+              <article key={index} className="card poem">
+                <p className="pill">Shayari • Hinglish</p>
+                <h3 className="card-title">Raat Ki Siyahi</h3>
+                <p className="card-snippet">
+                  {tale.split('\\n').map((line, idx) => (
+                    <span key={idx}>
+                      {line}
+                      <br />
+                    </span>
+                  ))}
+                </p>
+              </article>
+            ))}
           </div>
         </section>
 
@@ -392,54 +318,10 @@ function App() {
             </div>
 
             <div className="writer-grid">
-              {/* English micro card */}
-              <div className="writer-card">
-                <p className="pill">Micro Tale • English</p>
-                <label className="writer-label">Lines shown in first card</label>
-                <textarea
-                  className="writer-textarea"
-                  value={englishMicro}
-                  onChange={(e) => setEnglishMicro(e.target.value)}
-                  disabled={!isWriter}
-                />
-                {isWriter && (
-                  <button
-                    type="button"
-                    className="btn btn-ghost writer-delete-btn"
-                    onClick={() => handleDeletePiece('english')}
-                  >
-                    Delete this piece
-                  </button>
-                )}
-              </div>
-
-              {/* Hinglish micro card */}
-              <div className="writer-card">
-                <p className="pill">Micro Tale • Hinglish</p>
-                <label className="writer-label">
-                  Hindi feelings written in English letters
-                </label>
-                <textarea
-                  className="writer-textarea"
-                  value={hinglishMicro}
-                  onChange={(e) => setHinglishMicro(e.target.value)}
-                  disabled={!isWriter}
-                />
-                {isWriter && (
-                  <button
-                    type="button"
-                    className="btn btn-ghost writer-delete-btn"
-                    onClick={() => handleDeletePiece('hinglishMicro')}
-                  >
-                    Delete this piece
-                  </button>
-                )}
-              </div>
-
-              {/* Hinglish shayari card */}
+              {/* Only Shayari card now */}
               <div className="writer-card">
                 <p className="pill">Shayari • Hinglish</p>
-                <label className="writer-label">Lines shown in third card</label>
+                <label className="writer-label">All shayari shown in the section above</label>
                 <textarea
                   className="writer-textarea"
                   value={hinglishShayari}
@@ -452,7 +334,7 @@ function App() {
                     className="btn btn-ghost writer-delete-btn"
                     onClick={() => handleDeletePiece('hinglishShayari')}
                   >
-                    Delete this piece
+                    Delete all shayari
                   </button>
                 )}
               </div>
