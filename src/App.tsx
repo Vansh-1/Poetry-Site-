@@ -212,6 +212,15 @@ function App() {
     }
   }
 
+  // Split multi-line text into separate tales/shayari blocks.
+  // We treat one or more blank lines as separator, so you can add
+  // a new piece above the previous one with a blank line between.
+  const splitTales = (text: string): string[] =>
+    text
+      .split(/\n\s*\n/)
+      .map((t) => t.trim())
+      .filter((t) => t.length > 0)
+
   return (
     <div className="page">
       <header className="hero">
@@ -278,75 +287,60 @@ function App() {
 
           <div className="piece-panel">
             {activePiece === 'english' && (
-              <article className="card poem">
-                <p className="pill">Micro Tale • English</p>
-                <h3 className="card-title">Almost Love</h3>
-                <p className="card-snippet">
-                  {englishMicro.split('\n').map((line, idx) => (
-                    <span key={idx}>
-                      {line}
-                      <br />
-                    </span>
-                  ))}
-                </p>
-                {isWriter && (
-                  <button
-                    type="button"
-                    className="btn btn-ghost writer-delete-btn"
-                    onClick={() => handleDeletePiece('english')}
-                  >
-                    Delete this piece
-                  </button>
-                )}
-              </article>
+              <>
+                {splitTales(englishMicro).map((tale, index) => (
+                  <article key={index} className="card poem">
+                    <p className="pill">Micro Tale • English</p>
+                    <h3 className="card-title">Almost Love</h3>
+                    <p className="card-snippet">
+                      {tale.split('\n').map((line, idx) => (
+                        <span key={idx}>
+                          {line}
+                          <br />
+                        </span>
+                      ))}
+                    </p>
+                  </article>
+                ))}
+              </>
             )}
 
             {activePiece === 'hinglishMicro' && (
-              <article className="card poem">
-                <p className="pill">Micro Tale • Hindi (English script)</p>
-                <h3 className="card-title">Adhoori Baat</h3>
-                <p className="card-snippet">
-                  {hinglishMicro.split('\n').map((line, idx) => (
-                    <span key={idx}>
-                      {line}
-                      <br />
-                    </span>
-                  ))}
-                </p>
-                {isWriter && (
-                  <button
-                    type="button"
-                    className="btn btn-ghost writer-delete-btn"
-                    onClick={() => handleDeletePiece('hinglishMicro')}
-                  >
-                    Delete this piece
-                  </button>
-                )}
-              </article>
+              <>
+                {splitTales(hinglishMicro).map((tale, index) => (
+                  <article key={index} className="card poem">
+                    <p className="pill">Micro Tale • Hindi (English script)</p>
+                    <h3 className="card-title">Adhoori Baat</h3>
+                    <p className="card-snippet">
+                      {tale.split('\n').map((line, idx) => (
+                        <span key={idx}>
+                          {line}
+                          <br />
+                        </span>
+                      ))}
+                    </p>
+                  </article>
+                ))}
+              </>
             )}
 
             {activePiece === 'hinglishShayari' && (
-              <article className="card poem">
-                <p className="pill">Shayari • Hinglish</p>
-                <h3 className="card-title">Raat Ki Siyahi</h3>
-                <p className="card-snippet">
-                  {hinglishShayari.split('\n').map((line, idx) => (
-                    <span key={idx}>
-                      {line}
-                      <br />
-                    </span>
-                  ))}
-                </p>
-                {isWriter && (
-                  <button
-                    type="button"
-                    className="btn btn-ghost writer-delete-btn"
-                    onClick={() => handleDeletePiece('hinglishShayari')}
-                  >
-                    Delete this piece
-                  </button>
-                )}
-              </article>
+              <>
+                {splitTales(hinglishShayari).map((tale, index) => (
+                  <article key={index} className="card poem">
+                    <p className="pill">Shayari • Hinglish</p>
+                    <h3 className="card-title">Raat Ki Siyahi</h3>
+                    <p className="card-snippet">
+                      {tale.split('\n').map((line, idx) => (
+                        <span key={idx}>
+                          {line}
+                          <br />
+                        </span>
+                      ))}
+                    </p>
+                  </article>
+                ))}
+              </>
             )}
           </div>
         </section>
