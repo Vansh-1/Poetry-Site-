@@ -212,7 +212,7 @@ function App() {
     }
   }
 
-  // Split multi-line text into separate tales/shayari blocks.
+  // Split multi-line text into separate shayari blocks.
   // We treat one or more blank lines as separator, so you can add
   // a new piece above the previous one with a blank line between.
   const splitTales = (text: string): string[] =>
@@ -220,6 +220,27 @@ function App() {
       .split(/\n\s*\n/)
       .map((t) => t.trim())
       .filter((t) => t.length > 0)
+
+  // Parse shayari into { title, bodyLines }.
+  // First non-empty line of each block becomes the title,
+  // the remaining lines are the body (each shown on its own line).
+  const parseShayari = (text: string) =>
+    splitTales(text).map((block) => {
+      const lines = block
+        .split('\n')
+        .map((l) => l.trim())
+        .filter((l) => l.length > 0)
+
+      if (!lines.length) {
+        return { title: 'Untitled', bodyLines: [] as string[] }
+      }
+
+      const [first, ...rest] = lines
+      const title = first || 'Untitled'
+      const bodyLines = rest.length ? rest : [first]
+
+      return { title, bodyLines }
+    })
 
   return (
     <div className="page">
@@ -254,12 +275,12 @@ function App() {
           </div>
 
           <div className="piece-panel">
-            {splitTales(hinglishShayari).map((tale, index) => (
+            {parseShayari(hinglishShayari).map(({ title, bodyLines }, index) => (
               <article key={index} className="card poem">
                 <p className="pill">Shayari • Hinglish</p>
-                <h3 className="card-title">Raat Ki Siyahi</h3>
+                <h3 className="card-title">{title}</h3>
                 <p className="card-snippet">
-                  {tale.split('\\n').map((line, idx) => (
+                  {bodyLines.map((line, idx) => (
                     <span key={idx}>
                       {line}
                       <br />
@@ -321,7 +342,10 @@ function App() {
               {/* Only Shayari card now */}
               <div className="writer-card">
                 <p className="pill">Shayari • Hinglish</p>
-                <label className="writer-label">All shayari shown in the section above</label>
+                <label className="writer-label">
+                  First line = title, next lines = shayari. Leave one blank line between
+                  each shayari.
+                </label>
                 <textarea
                   className="writer-textarea"
                   value={hinglishShayari}
